@@ -62,42 +62,62 @@ int main() {
 
 
 	//create vertex shader
-	//vertex shader draws 3 points on a screen
+	//vertex shader draws 3 points on a screen oh and get the reference
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	//pull from vertex shader source above and compiles
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
 
-	//create fragment shader
+	//create fragment shader and get the reference 
 	//fragment shader interpolates whatever is in between the triangles and draws things on it is what I gathered
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
 
-
+	// create shader program and get the reference
 	GLuint shaderProgram = glCreateProgram();
+
+	//attach the vertex & fragment shaders to the shader program
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
+	// after attaching, link it to the shader program
 	glLinkProgram(shaderProgram);
 
+	//delete since both are now attached to the program
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	//VBO Vertex Buffer Object
+	// stores the stuff needed to draw the vertex
+	// like the vertex data bro
+	//VAO == Vertex Array Object
+	// stores stuff needed to supply vertex data, stores both vertex data AND buffer objects providing vertex data arrays
+	// apparenlty it just references the buffers but not their contents
+	// think of it as a bundle of pointers towards the VBO
+	// they go both hand in hand
+	GLuint VBO, VAO;
 
-	GLuint VAO, VBO;
-
-
+	//generate the vertex arrays and reference at VAO
 	glGenVertexArrays(1, &VAO);
+	//generate the buffers and reference them at VBO
 	glGenBuffers(1, &VBO);
 
+	// binds a vertex array given a reference
 	glBindVertexArray(VAO);
-
+	// binds a buffer array given a reference, GL_ARRAY_BUFFER is the type
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//pipe in the vertices that I want to draw from earlier
+	//GL_STATIC_DRAW means that the I will not change the vertices, STATIC
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	
+	//specifies the format of the vertices that you're piping in
+	//index 0, size of 3, the type (float), if it's normalized (no), how large it is, and a weird looking as void pointer
+	//REFER TO VAO WHY THIS IS USEFUL
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//enable attribute array
 	glEnableVertexAttribArray(0);
 
+	//bind the VBO and the VAO to INDEX 0
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -112,10 +132,15 @@ int main() {
 	
 	// check for window events (i.e if you close it)
 	while (!glfwWindowShouldClose(window)) {
+		//make the color like this
 		glClearColor(0.07f, 0.013f, 0.17f, 1.0f);
+		//clear the buffer and assing the new color
 		glClear(GL_COLOR_BUFFER_BIT);
+		//use use the shader program
 		glUseProgram(shaderProgram);
+		//bind vertex array so that opengl knows how to interpret the VBO
 		glBindVertexArray(VAO);
+		//draw le triangle
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		//make sure to swap the buffers so that it actually shows
